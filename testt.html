@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cyber Shield</title>
+<style>
+:root{--bg:#050a08;--panel:#0d1912;--green:#19e68c;--text:#effff7;--muted:#9bb6a8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+header{padding:20px 7%;border-bottom:1px solid #204632;display:flex;justify-content:space-between}
+.logo{font-size:24px;font-weight:bold}.logo span,h1 span{color:var(--green)}
+nav a{color:var(--muted);margin-left:15px;text-decoration:none}
+.hero{padding:65px 7%;background:radial-gradient(circle at top right,#124329,var(--bg) 65%)}
+h1{font-size:clamp(35px,6vw,60px);margin:0}
+p{color:var(--muted);line-height:1.6}
+button,.button{background:var(--green);color:#04140c;border:0;border-radius:7px;padding:11px 16px;font-weight:bold;cursor:pointer;text-decoration:none}
+main{padding:30px 7%}
+.stats,.grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px}
+.stat,.card,.about{background:var(--panel);border:1px solid #204632;border-radius:12px;padding:18px}
+.stat strong{display:block;color:var(--green);font-size:25px}
+.controls{display:grid;grid-template-columns:1fr 200px;gap:10px;margin:20px 0}
+input,select{padding:13px;background:var(--panel);color:white;border:1px solid #204632;border-radius:7px;min-width:0}
+.card h3{font-size:16px}.badge{font-size:12px;font-weight:bold}
+.Critical{color:#ff6262}.High{color:#ff9b50}.Medium{color:#f3d65b}.Low{color:#59b9ff}
+.details{background:none;color:var(--green);padding:0}
+#empty{display:none;color:var(--muted)}
+.about{margin-top:30px}
+footer{text-align:center;padding:22px;color:var(--muted);border-top:1px solid #204632}
+.modal{display:none;position:fixed;inset:0;background:#000d;padding:20px;overflow:auto}
+.content{max-width:600px;margin:8vh auto;background:var(--panel);padding:24px;border:1px solid var(--green);border-radius:12px}
+.close{float:right}
+@media(max-width:650px){.grid,.stats,.controls{grid-template-columns:1fr}header{gap:10px;flex-wrap:wrap}.hero,main{padding:30px 5%}}
+</style>
+</head>
+<body>
+<header>
+<div class="logo">Cyber <span>Shield</span></div>
+<nav><a href="#home">Home</a><a href="#library">Library</a><a href="#about">About</a></nav>
+</header>
+<section class="hero" id="home">
+<h1>Secure Your <span>Digital World.</span></h1>
+<p>Discover common web vulnerabilities and learn how to prevent them.</p>
+<a class="button" href="#library">Explore Library →</a>
+</section>
+<main>
+<div class="stats">
+<div class="stat"><strong id="total">120</strong>Security Topics</div>
+<div class="stat"><strong>4</strong>Severity Levels</div>
+<div class="stat"><strong>Learn</strong>Protect Your Website</div>
+</div>
+<section id="library">
+<h2>Vulnerability Library</h2>
+<div class="controls">
+<input id="search" placeholder="Search vulnerabilities...">
+<select id="severity">
+<option>All</option><option>Critical</option><option>High</option><option>Medium</option><option>Low</option>
+</select>
+</div>
+<p id="count">Loading topics...</p>
+<div class="grid" id="cards"></div>
+<p id="empty">No results found.</p>
+</section>
+<section class="about" id="about">
+<h2>About Cyber Shield</h2>
+<p>An educational security library explaining common vulnerabilities, their risks, and prevention methods. This version does not automatically scan websites.</p>
+<p>Only test websites and systems you have permission to assess.</p>
+</section>
+</main>
+<footer>Cyber Shield | Learn Safely. Build Securely.</footer>
+<div class="modal" id="modal">
+<div class="content">
+<button class="close" id="close">Close ✕</button>
+<h2 id="title"></h2>
+<p id="level"></p><h3>Explanation</h3><p id="description"></p>
+<h3>Prevention</h3><p id="fix"></p>
+</div></div>
+<script>
+const names=`SQL Injection|Critical
+Cross-Site Scripting (XSS)|High
+Broken Access Control|Critical
+Broken Authentication|High
+Security Misconfiguration|High
+Cryptographic Failures|High
+Server-Side Request Forgery|High
+Insecure Deserialization|High
+Path Traversal|High
+File Upload Vulnerability|High
+Cross-Site Request Forgery|Medium
+Sensitive Data Exposure|High
+XML External Entity (XXE)|High
+Command Injection|Critical
+Open Redirect|Medium
+Clickjacking|Medium
+IDOR|High
+Weak Password Policy|Medium
+Brute Force|High
+Session Fixation|High
+Insecure Cookies|Medium
+Missing Content Security Policy|Medium
+Missing HSTS|Medium
+CORS Misconfiguration|High
+Excessive Data Exposure|Medium
+Mass Assignment|High
+Missing API Rate Limits|Medium
+Broken API Authorization|Critical
+GraphQL Introspection Exposure|Low
+GraphQL Denial of Service|High
+JWT Signature Not Verified|Critical
+JWT Algorithm Confusion|High
+Sensitive Data in JWT|Medium
+OAuth Redirect URI Weakness|High
+Missing OAuth State|Medium
+Password Reset Token Weakness|High
+Account Enumeration|Medium
+MFA Bypass|Critical
+Insecure Password Storage|Critical
+Hardcoded Credentials|Critical
+Exposed API Keys|High
+Secrets in Logs|High
+Verbose Error Messages|Low
+Debug Mode in Production|High
+Directory Listing|Low
+Backup File Exposure|High
+Source Map Exposure|Medium
+Outdated Components|High
+Vulnerable JavaScript Library|High
+Supply Chain Risk|High
+Dependency Confusion|High
+Typosquatting Dependency|Medium
+Insecure CI/CD Permissions|High
+Public Repository Secrets|High
+Unsafe HTTP Methods|Medium
+HTTP Request Smuggling|High
+Host Header Injection|High
+Cache Poisoning|High
+Cache Deception|Medium
+Sensitive Data in Cache|High
+DNS Rebinding|Medium
+Subdomain Takeover|High
+TLS Validation Disabled|Critical
+Weak TLS Configuration|Medium
+Mixed Content|Medium
+Missing Security Headers|Medium
+MIME Sniffing|Low
+Unsafe File Handling|High
+Race Condition|High
+Business Logic Flaw|High
+Price Manipulation|High
+Coupon Abuse|Medium
+Payment State Tampering|Critical
+Webhook Signature Not Checked|High
+Webhook Replay|Medium
+Insufficient Transaction Authorization|High
+Unvalidated Redirect|Medium
+Improper Input Validation|Medium
+Unicode Normalization Issue|Medium
+Regex Denial of Service|High
+XML Resource Exhaustion|High
+JSON Parser Resource Exhaustion|Medium
+Denial of Service|High
+Unrestricted Resource Consumption|High
+Unauthorized File Deletion|High
+Unsafe Archive Extraction|High
+Temporary File Exposure|Medium
+Symlink Following|High
+Local File Inclusion|High
+Remote File Inclusion|Critical
+Server-Side Template Injection|Critical
+Expression Language Injection|High
+LDAP Injection|High
+NoSQL Injection|High
+XPath Injection|High
+ORM Injection|High
+SQL Error Disclosure|Low
+Public Database Exposure|Critical
+Excessive Database Privileges|High
+Unencrypted Database Traffic|High
+Improper Tenant Isolation|Critical
+Multi-Tenant Cache Leakage|High
+Public Cloud Storage|High
+Cloud IAM Overpermission|High
+Cloud Metadata Exposure|High
+Container Misconfiguration|High
+Kubernetes Dashboard Exposure|Critical
+Unrestricted Admin Interface|High
+Default Credentials|Critical
+Missing Authorization on Export|High
+CSV Formula Injection|Medium
+Email Header Injection|Medium
+SMTP Relay Misconfiguration|High
+Notification Spam Abuse|Medium
+Privacy Data Overcollection|Medium
+Insecure Data Deletion|Medium
+Missing Audit Logging|Medium
+Log Injection|Medium
+Log Access Misconfiguration|High
+Time-of-Check to Time-of-Use|High
+Improper Exception Handling|Medium`;
+const topics=names.split("\n").map((row,i)=>{let [name,severity]=row.split("|");return {id:i+1,name,severity,description:name+" is a web security risk that may affect confidentiality, integrity, or availability.",fix:"Validate input, enforce server-side authorization, use secure configuration, and follow trusted security guidance."}});
+const extra=`WebSocket Origin Misconfiguration|High
+WebSocket Missing Authorization|High
+Prototype Pollution|High
+DOM-Based XSS|High
+Reflected XSS|High
+Stored XSS|High
+Client-Side Access Control|High
+Third-Party Script Risk|High
+Missing Subresource Integrity|Low
+Account Takeover via Recovery|Critical
+Unverified Email Change|High
+Improper Role Change|Critical
+Privilege Escalation|Critical
+Unsafe Markdown Rendering|Medium
+Insecure Document Preview|Medium
+Image Processing Vulnerability|High
+Archive Bomb|High
+Missing Request Size Limit|Medium
+Predictable Upload Paths|Medium
+Private Object URL Leakage|High
+Improper Logout|Medium
+Insecure Remember-Me Token|High
+Weak Account Lockout|Medium
+Password Reset Host Header Poisoning|High
+Open Cloud Management Port|High
+Unrestricted GraphQL Fields|Medium
+Improper Cache-Control|Medium
+Insecure Cross-Origin Messaging|High
+Wildcard postMessage Target|Medium
+Unsafe URL Scheme|Medium
+Untrusted HTML Email|High
+Missing Reauthentication|Medium
+Improper Data Export Limits|Medium
+Uncontrolled Redirect Chain|Low
+Unmanaged Dependency Updates|Medium
+Insecure Test Endpoint|Medium
+Production Test Data Exposure|High
+Unrestricted Search Endpoint|Medium
+Improper Pagination Limits|Low
+Missing CSRF Protection|High
+Insecure Password Change|High
+Untrusted Download Filename|Medium
+Improper HTTP Cache Vary|Medium
+Weak Service-to-Service Security|High
+Missing Request Origin Checks|Medium
+Unsafe Passwordless Login Token|High
+Insecure Device Trust|Medium
+Unprotected Account Deletion|High
+Improper Consent Enforcement|Medium
+Missing Security Review|Medium`.split("\n");
+extra.forEach((row,i)=>{let [name,severity]=row.split("|");topics.push({id:topics.length+1,name,severity,description:name+" may create a security weakness when an application is incorrectly designed or configured.",fix:"Review trusted documentation, validate inputs, apply least privilege, and test changes safely."})});
+function render(){
+const q=document.getElementById("search").value.toLowerCase();
+const level=document.getElementById("severity").value;
+const found=topics.filter(t=>(t.name+" "+t.description).toLowerCase().includes(q)&&(level==="All"||t.severity===level));
+document.getElementById("cards").innerHTML=found.map(t=>`<article class="card"><div><span class="badge ${t.severity}">${t.severity}</span><h3>${t.id}. ${t.name}</h3></div><p>${t.description}</p><button class="details" data-id="${t.id}">View Details →</button></article>`).join("");
+document.getElementById("count").textContent=`Showing ${found.length} of ${topics.length} topics`;
+document.getElementById("empty").style.display=found.length?"none":"block";
+}
+document.getElementById("cards").addEventListener("click",e=>{
+const b=e.target.closest("[data-id]");if(!b)return;
+const t=topics.find(x=>x.id===Number(b.dataset.id));if(!t)return;
+document.getElementById("title").textContent=t.name;
+document.getElementById("level").textContent="Severity: "+t.severity;
+document.getElementById("description").textContent=t.description;
+document.getElementById("fix").textContent=t.fix;
+document.getElementById("modal").style.display="block";
+});
+document.getElementById("close").onclick=()=>document.getElementById("modal").style.display="none";
+document.getElementById("search").oninput=render;
+document.getElementById("severity").onchange=render;
+document.getElementById("total").textContent=topics.length;
+render();
+</script>
+</body>
+</html>
